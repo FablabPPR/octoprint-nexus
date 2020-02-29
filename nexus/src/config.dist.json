@@ -1,0 +1,16 @@
+{
+    "printers": {
+        "alfawise": {
+            "name": "Alfawise U20 pro",
+            "apiKey": ""
+        },
+        "dagoma1": {
+            "name": "Dagoma DiscoEasy 200",
+            "apiKey": ""
+        },
+        "dagoma2": {
+            "name": "Dagoma DiscoEasy 200 <strong>(avec écran)</strong>",
+            "apiKey": ""
+        }
+    }
+}

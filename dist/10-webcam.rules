@@ -1,0 +1,2 @@
+SUBSYSTEM=="video4linux", ATTRS{idVendor}=="18ec", ATTRS{idProduct}=="3399", SYMLINK+="cam1"
+SUBSYSTEM=="video4linux", ATTRS{idVendor}=="0471", ATTRS{serial}=="01690000A6220709", SYMLINK+="cam2"
