@@ -16,9 +16,16 @@ const getApi = printer => {
     return clients[printer]
 }
 
-
-export default getApi
-
 export const getVersion = printer => {
     return getApi(printer).get('/version')
+}
+
+
+export const getSettings = printer => {
+    return getApi(printer).get('/settings')
+}
+
+
+export const getConnection = printer => {
+    return getApi(printer).get('/connection')
 }

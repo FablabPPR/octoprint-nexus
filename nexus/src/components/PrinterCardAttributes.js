@@ -1,22 +1,22 @@
 import React from 'react'
+import Badge from 'react-bootstrap/Badge'
+
+import { isReady } from '../octoprint/states'
 
 export default class PrinterCardAttributes extends React.PureComponent {
     render = () => (
-        <ul className="list-group list-group-flush">
+        <ul className="printer-card-attributes list-group list-group-flush">
             <li className="list-group-item d-flex justify-content-between">
-                <span>Octoprint Version</span>
-                <span className={
-                    "badge " +
-                    (this.props.state.version ? 'badge-secondary' : 'badge-danger')
-                }>{this.props.state.version || 'Unknown'}</span>
+                <span>Version</span>
+                <Badge variant={this.props.state.version ? 'primary' : 'danger'}>
+                    {this.props.state.version || 'Unknown'}
+                </Badge>
             </li>
             <li className="list-group-item d-flex justify-content-between">
                 <span>Status</span>
-                <span className={
-                    "badge " +
-                    (this.props.state.state ? 'badge-success' : 'badge-danger')
-                }>
-                    {this.props.state.state || 'Unknown'}</span>
+                <Badge variant={isReady(this.props.state.state) ? 'success' : 'danger'}>
+                    {this.props.state.state || 'Unknown'}
+                </Badge>
             </li>
         </ul>
     )
