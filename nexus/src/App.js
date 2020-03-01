@@ -6,7 +6,7 @@ export default class App extends React.PureComponent {
   render = () => (
       <>
         <nav className="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-          <a className="navbar-brand" href="/">FablabPPR print Nexus</a>
+          <a className="navbar-brand" href="/">Print nexus</a>
         </nav>
         <main role="main" className="container">
           <Printers/>
