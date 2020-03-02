@@ -1,4 +1,7 @@
 import React from 'react'
+import { connect } from 'react-redux'
+import { bindActionCreators } from 'redux'
+import { get } from 'lodash'
 import Button from 'react-bootstrap/Button'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import Modal from 'react-bootstrap/Modal'
@@ -6,20 +9,15 @@ import Image from 'react-bootstrap/Image'
 import Spinner from 'react-bootstrap/Spinner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSignInAlt, faVideo } from '@fortawesome/free-solid-svg-icons'
-import update from 'immutability-helper';
 
+import * as PrinterActions from '../actions/printers'
 import PrinterCardAttributes from './PrinterCardAttributes'
 import AlfawiseImage from '../img/alfawise.jpg';
 import DagomaImage from '../img/dagoma.jpg';
-import { getVersion, getSettings, getConnection } from '../api/octoprint'
-import { isReady } from '../octoprint/states'
 
-export default class PrinterCard extends React.PureComponent {
+class PrinterCard extends React.PureComponent {
 
     state = {
-        ready: undefined,
-        error: false,
-        state: {},
         showModal: false,
     }
 
@@ -32,43 +30,17 @@ export default class PrinterCard extends React.PureComponent {
     showModal = () => this.setState({ showModal: true })
     hideModal = () => this.setState({ showModal: false })
 
-    componentDidMount = async () => {
-        await getVersion(this.props.id)
-            .then(response => this.setState(update(this.state, {
-                state: {
-                    version: { $set: response.data.server }
-                }
-            }))).catch(() => this.setState({ error: true }))
-
-        await getConnection(this.props.id).then(response => {
-            if (response.data.current.state) {
-                this.setState(update(this.state, {
-                    ready: {$set: isReady(response.data.current.state)},
-                    state: {state: {$set: response.data.current.state}}
-                }))
-            }
-        }).catch(() => {
-            this.setState({
-                ready: false,
-                error: true
-            })
-        })
-
-        getSettings(this.props.id).then(response => {
-            if (response.data.webcam.streamUrl !== '') {
-                this.setState(update(this.state, {
-                    state: {
-                        webcam: { $set: response.data.webcam.streamUrl }
-                    }
-                }))
-            }
-        })
+    componentDidMount = () => {
+        this.props.actions.fetchState(this.props.id)
     }
 
     render = () => {
 
-        const { id, printer } = this.props
-        const { state, error, ready, showModal } = this.state
+        const { showModal } = this.state
+        const { id, printer, loading, status } = this.props
+
+        const streamUrl = get(status, 'settings.webcam.streamUrl')
+        const ready = get(status, 'state.flags.operational')
 
         return (
             <div className="card">
@@ -76,12 +48,12 @@ export default class PrinterCard extends React.PureComponent {
                 <div className="card-body">
                     <h5 className="card-title" dangerouslySetInnerHTML={{ __html: printer.name }} />
                 </div>
-                <PrinterCardAttributes state={state} printer={id} />
+                <PrinterCardAttributes status={status} printer={id} />
                 <div className="card-body d-flex flex-column justify-content-end">
                     <ButtonGroup>
-                        {state.webcam && (
+                        {streamUrl && (
                             <>
-                                <Button onClick={this.showModal}>
+                                <Button size='sm' onClick={this.showModal}>
                                     <FontAwesomeIcon icon={faVideo} />
                                 </Button>
                                 <Modal
@@ -94,25 +66,19 @@ export default class PrinterCard extends React.PureComponent {
                                         </Modal.Title>
                                     </Modal.Header>
                                     <Modal.Body className="d-flex justify-content-center">
-                                        <img className="img-fluid" src={state.webcam} alt="webcam" />
+                                        <img className="img-fluid" src={streamUrl} alt="webcam" />
                                     </Modal.Body>
                                 </Modal>
                             </>
                         )}
-                        <Button variant={ready ? 'primary' : 'danger'} disabled={!ready || error} href={`/${id}/`} >
-                            {(error || ready === false) && 'Connexion impossible'}
-                            {!error && ready === undefined && (
-                                <>
-                                    <Spinner as="span" size="sm" animation="border" />
-                                    Connexion en cours ...
-                                </>
-                            )}
-                            {!error && ready && (
-                                <>
-                                    <FontAwesomeIcon icon={faSignInAlt} />&nbsp;
-                                    Piloter
-                                </>
-                            )}
+                        <Button
+                            size="sm"
+                            variant={loading ? 'secondary' : (ready ? 'primary' : 'danger')}
+                            disabled={!ready}
+                            href={`/${id}/`} >
+                            {loading && <><Spinner as="span" size="sm" animation="border" />&nbsp;Connexion en cours ...</>}
+                            {!loading && !ready && 'Connexion impossible'}
+                            {!loading && ready && <><FontAwesomeIcon icon={faSignInAlt} />&nbsp;Piloter</>}
                         </Button>
                     </ButtonGroup>
                 </div>
@@ -120,3 +86,13 @@ export default class PrinterCard extends React.PureComponent {
         )
     }
 }
+
+const mapDispatchToProps = (dispatch) => ({
+    actions: bindActionCreators(PrinterActions, dispatch),
+})
+
+const mapStateToProps = (state, props) => ({
+    ...state.printers[props.id],
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(PrinterCard)

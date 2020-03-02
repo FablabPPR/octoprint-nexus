@@ -1,23 +1,30 @@
 import React from 'react'
 import Badge from 'react-bootstrap/Badge'
-
-import { isReady } from '../octoprint/states'
+import { get } from 'lodash'
 
 export default class PrinterCardAttributes extends React.PureComponent {
-    render = () => (
-        <ul className="printer-card-attributes list-group list-group-flush">
-            <li className="list-group-item d-flex justify-content-between">
-                <span>Version</span>
-                <Badge variant={this.props.state.version ? 'primary' : 'danger'}>
-                    {this.props.state.version || 'Unknown'}
-                </Badge>
-            </li>
-            <li className="list-group-item d-flex justify-content-between">
-                <span>Status</span>
-                <Badge variant={isReady(this.props.state.state) ? 'success' : 'danger'}>
-                    {this.props.state.state || 'Unknown'}
-                </Badge>
-            </li>
-        </ul>
-    )
+
+    render = () => {
+
+        const ready = get(this.props.status, 'state.flags.operational')
+        const version = get(this.props.status, 'version.server')
+        const state = get(this.props.status, 'state.text')
+
+        return (
+            <ul className="printer-card-attributes list-group list-group-flush">
+                <li className="list-group-item d-flex justify-content-between">
+                    <span>Version</span>
+                    <Badge variant={version ? 'primary' : 'danger'}>
+                        {version || 'Unknown'}
+                    </Badge>
+                </li>
+                <li className="list-group-item d-flex justify-content-between">
+                    <span>Status</span>
+                    <Badge variant={ready ? 'success' : 'danger'}>
+                        {state || 'Offline'}
+                    </Badge>
+                </li>
+            </ul>
+        )
+    }
 }

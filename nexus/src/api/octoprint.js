@@ -16,16 +16,27 @@ const getApi = printer => {
     return clients[printer]
 }
 
-export const getVersion = printer => {
+const getVersion = printer => {
     return getApi(printer).get('/version')
 }
 
-
-export const getSettings = printer => {
+const getSettings = printer => {
     return getApi(printer).get('/settings')
 }
 
+const getState = printer => {
+    return getApi(printer).get('/printer', {
+            validateStatus: status => [200, 409].includes(status)
+        }
+    )
+}
 
-export const getConnection = printer => {
-    return getApi(printer).get('/connection')
+export const getStatus = async printer => {
+    let status = {}
+
+    status.version = (await getVersion(printer)).data
+    status.settings = (await getSettings(printer)).data
+    status.state = (await getState(printer)).data.state
+
+    return status
 }
