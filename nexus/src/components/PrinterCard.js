@@ -31,13 +31,14 @@ class PrinterCard extends React.PureComponent {
     hideModal = () => this.setState({ showModal: false })
 
     componentDidMount = () => {
+        this.props.actions.selectPrinter()
         this.props.actions.fetchState(this.props.id)
     }
 
     render = () => {
 
         const { showModal } = this.state
-        const { id, printer, loading, status } = this.props
+        const { id, printer, loading, status, onSelect } = this.props
 
         const streamUrl = get(status, 'settings.webcam.streamUrl')
         const ready = get(status, 'state.flags.operational')
@@ -75,7 +76,7 @@ class PrinterCard extends React.PureComponent {
                             size="sm"
                             variant={loading ? 'secondary' : (ready ? 'primary' : 'danger')}
                             disabled={!ready}
-                            href={`/${id}/`} >
+                            onClick={onSelect} >
                             {loading && <><Spinner as="span" size="sm" animation="border" />&nbsp;Connexion en cours ...</>}
                             {!loading && !ready && 'Connexion impossible'}
                             {!loading && ready && <><FontAwesomeIcon icon={faSignInAlt} />&nbsp;Piloter</>}
@@ -92,7 +93,7 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 const mapStateToProps = (state, props) => ({
-    ...state.printers[props.id],
+    ...state.printers.printers[props.id],
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PrinterCard)

@@ -2,6 +2,14 @@
 
 body {
     padding-top: 5rem;
+    margin: 0;
+}
+
+iframe {
+    display: block;
+    border: none;
+    height: 100vh;
+    width: 100vw;
 }
 
 .badge {

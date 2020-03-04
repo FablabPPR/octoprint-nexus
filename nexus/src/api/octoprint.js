@@ -26,20 +26,20 @@ const getSettings = printer => {
     return getApi(printer).get('/settings')
 }
 
-const getState = printer => {
+export const getState = printer => {
     return getApi(printer).get('/printer', {
             validateStatus: status => [200, 409].includes(status)
         }
-    )
+    ).then(response => response.data.state)
 }
 
-export const getStatus = async printer => {
+export const getFullStatus = async printer => {
 
     const status = {}
 
     const version = getVersion(printer).then(response => status.version = response.data)
     const settings = getSettings(printer).then(response => status.settings = response.data)
-    const state = getState(printer).then(response => status.state = response.data.state)
+    const state = getState(printer).then(state => status.state = state)
 
     await Promise.all([version, settings, state]).then(values => {
         status.version = values[0]
@@ -57,7 +57,7 @@ export const getStatus = async printer => {
 
     while(!operational) {
         console.warn('Printer ' + printer + ' offline, try to reconnect, attempt ' + retryCount + '/ ' + retry + ' ...')
-        status.state = (await getState(printer)).data.state
+        status.state = (await getState(printer))
 
         operational = get(status, 'state.flags.operational')
 
