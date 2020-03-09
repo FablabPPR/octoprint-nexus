@@ -11,7 +11,7 @@ class Printer extends React.PureComponent {
     }
 
     render = () => (
-        <iframe title="Octoprint" src={'/' + this.props.id}></iframe>
+        <iframe title="Octoprint" src={`/${this.props.id}/`}></iframe>
     )
 }
 
